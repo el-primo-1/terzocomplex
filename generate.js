@@ -57,32 +57,6 @@ async function generateCalendar() {
         const message = `Add your message or <img src="path-to-image.jpg" alt="Day ${day}"> here for day ${day}`;
         await fs.writeFile(htmlPath, createHtmlContent(day, message));
     }
-
-    // Create index page
-    const indexContent = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Calendario dell'Avvento 🎄</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .day { border: 1px solid #ccc; padding: 10px; text-align: center; }
-    </style>
-</head>
-<body>
-    <h1>Calendario dell'Avvento 🎄</h1>
-    <div class="grid">
-        ${Array.from({length: TOTAL_DAYS}, (_, i) => i + 1)
-            .map(day => `<div class="day">
-                <h2>Day ${day}</h2>
-                <a href="pages/day${day}.html">View Page</a>
-            </div>`).join('')}
-    </div>
-</body>
-</html>`;
-    
-    await fs.writeFile(path.join(OUTPUT_DIR, 'index.html'), indexContent);
 }
 
 generateCalendar().catch(console.error);
