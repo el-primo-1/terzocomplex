@@ -1,19 +1,10 @@
-const QRCode = require('qrcode');
-const fs = require('fs/promises');
-const path = require('path');
 
-const BASE_URL = 'https://el-primo-1.github.io/terzocomplex';
-const START_DAY = 8;
-const END_DAY = 25;  // December 25th (Christmas)
-const OUTPUT_DIR = 'advent-calendar';
-
-const createHtmlContent = (actualDate, message) => `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${actualDate} - Calendario dell'Avvento 🎄</title>
+    <title>12 Dicembre - Calendario dell'Avvento 🎄</title>
     <style>
         body {
             font-family: 'Cormorant Garamond', Georgia, serif;
@@ -82,7 +73,7 @@ const createHtmlContent = (actualDate, message) => `
 </head>
 <body>
     <div class="container">
-        <h1>${actualDate}</h1>
+        <h1>12 Dicembre</h1>
         <svg class="olive-branch" viewBox="0 0 100 100">
             <path d="M50,90 C30,60 70,60 50,30" fill="none" stroke="#4a6741" stroke-width="2"/>
             <path d="M45,85 C35,65 65,65 45,35" fill="none" stroke="#4a6741" stroke-width="2"/>
@@ -96,30 +87,8 @@ const createHtmlContent = (actualDate, message) => `
             </g>
         </svg>
         <div class="content">
-            ${message}
+            "Aspirate ai carismi più grandi! E io vi mostrerò una via migliore di tutte” (1 Cor 12,31)
         </div>
     </div>
 </body>
 </html>
-`;
-
-async function generateCalendar() {
-    await fs.mkdir(OUTPUT_DIR, { recursive: true });
-    await fs.mkdir(path.join(OUTPUT_DIR, 'qr-codes'), { recursive: true });
-    await fs.mkdir(path.join(OUTPUT_DIR, 'pages'), { recursive: true });
-
-    for (let day = START_DAY; day <= END_DAY; day++) {
-        const actualDate = `${day} Dicembre`;
-        const pageUrl = `${BASE_URL}/advent-calendar/pages/december${day}.html`;
-        const qrCodePath = path.join(OUTPUT_DIR, 'qr-codes', `december${day}.png`);
-        const htmlPath = path.join(OUTPUT_DIR, 'pages', `december${day}.html`);
-
-        const message = `Aggiungi messaggio per ${actualDate} quì`;
-        await QRCode.toFile(qrCodePath, pageUrl);
-        await fs.writeFile(htmlPath, createHtmlContent(actualDate, message));
-    }
-
-    console.log('Generated QR codes and HTML pages successfully!');
-}
-
-generateCalendar().catch(console.error);

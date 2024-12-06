@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8 Dicembre - Calendario dell'Avvento 🎄</title>
+    <style>
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #f8f4e6, #eae0cc);
+            color: #2c1810;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #66392c;
+            font-weight: normal;
+            border-bottom: 2px solid #d4b59e;
+            padding-bottom: 0.5rem;
+        }
+
+        .content {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+
+        #game-container {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            margin: 20px auto;
+            background: #fff;
+            border: 2px solid #66392c;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .character {
+            position: absolute;
+            font-size: 2.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        .character.tapped {
+            transform: scale(1.2);
+        }
+
+        #start-button {
+            padding: 12px 24px;
+            background: #718e5c;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        #start-button:hover {
+            background: #4a6741;
+        }
+
+        #score, #timer {
+            font-size: 1.2rem;
+            color: #66392c;
+            margin: 10px 0;
+        }
+
+        .pop-text {
+            position: absolute;
+            font-size: 1rem;
+            pointer-events: none;
+            animation: pop-up 0.5s ease-out forwards;
+        }
+
+        .pop-text.good {
+            color: #4a6741;
+        }
+
+        .pop-text.bad {
+            color: #cc0000;
+        }
+
+        @keyframes pop-up {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>8 Dicembre</h1>
+        <div class="content">
+            Tocca i diavoli 👿 per convertirli!<br>
+            Ma attento agli angeli 👼 (-1 punto)
+        </div>
+        <button id="start-button">Inizia Gioco</button>
+        <div id="timer">Tempo: 20s</div>
+        <div id="score">Punti: 0</div>
+        <div id="game-container"></div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreElement = document.getElementById('score');
+        const startButton = document.getElementById('start-button');
+        const timerElement = document.getElementById('timer');
+        let score = 0;
+        let timeLeft = 20;
+        let gameInterval;
+        let timerInterval;
+        let isPlaying = false;
+
+        function createCharacter() {
+            if (!isPlaying) return;
+
+            const character = document.createElement('div');
+            character.className = 'character';
+            
+            // 50% chance for angel, 50% for devil
+            const isAngel = Math.random() < 0.5;
+            character.innerHTML = isAngel ? '👼' : '👿';
+            character.dataset.type = isAngel ? 'angel' : 'devil';
+            
+            // Random position
+            const padding = 40;
+            character.style.left = (padding + Math.random() * (gameContainer.offsetWidth - 2 * padding)) + 'px';
+            character.style.top = (padding + Math.random() * (gameContainer.offsetHeight - 2 * padding)) + 'px';
+            
+            character.addEventListener('click', () => handleTap(character));
+            character.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleTap(character);
+            });
+
+            gameContainer.appendChild(character);
+
+            // Remove if not tapped
+            setTimeout(() => {
+                if (character.parentElement === gameContainer) {
+                    character.remove();
+                }
+            }, 1800); // Faster disappear time
+        }
+
+        function handleTap(character) {
+            if (!isPlaying) return;
+
+            character.classList.add('tapped');
+            
+            const isAngel = character.dataset.type === 'angel';
+            if (isAngel) {
+                score = Math.max(0, score - 1); // Prevent negative score
+                showPopText('Oops! -1 😔', character.style.left, character.style.top, false);
+            } else {
+                score++;
+                showPopText('Alleluia! 🙏', character.style.left, character.style.top, true);
+            }
+            
+            scoreElement.textContent = `Punti: ${score}`;
+            setTimeout(() => character.remove(), 100);
+        }
+
+        function showPopText(text, left, top, isGood) {
+            const popText = document.createElement('div');
+            popText.className = `pop-text ${isGood ? 'good' : 'bad'}`;
+            popText.textContent = text;
+            popText.style.left = left;
+            popText.style.top = top;
+            gameContainer.appendChild(popText);
+            setTimeout(() => popText.remove(), 500);
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerElement.textContent = `Tempo: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 20;
+            scoreElement.textContent = 'Punti: 0';
+            timerElement.textContent = 'Tempo: 20s';
+            isPlaying = true;
+            startButton.textContent = 'In corso...';
+            startButton.disabled = true;
+            
+            // Clear existing characters
+            document.querySelectorAll('.character').forEach(char => char.remove());
+            
+            // Create characters more frequently
+            gameInterval = setInterval(createCharacter, 600); // Spawn every 400ms
+            // Spawn additional characters
+            setInterval(() => {
+                if (isPlaying && Math.random() < 0.4) { // 50% chance for extra spawn
+                    createCharacter();
+                }
+            }, 200);
+            
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            startButton.textContent = 'Riprova';
+            startButton.disabled = false;
+
+            const messages = [
+                "Ben fatto! ✨",
+                "Che bel lavoro! 🙌",
+                "Continua così! 😇"
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            alert(`${randomMessage}\nHai convertito ${score} diavoli!`);
+        }
+
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>

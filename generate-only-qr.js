@@ -3,20 +3,20 @@ const fs = require('fs/promises');
 const path = require('path');
 
 const BASE_URL = 'https://el-primo-1.github.io/terzocomplex';
-const TOTAL_DAYS = 18;
+const START_DAY = 8;
+const END_DAY = 25;  // December 25th (Christmas)
 const OUTPUT_DIR = 'advent-calendar';
 
-
 async function generateQR() {
-        // Generate QR codes and HTML pages for each day
-        for (let day = 1; day <= TOTAL_DAYS; day++) {
-            const pageUrl = `${BASE_URL}/advent-calendar/pages/day${day}.html`;
-            const qrCodePath = path.join(OUTPUT_DIR, 'qr-codes', `day${day}.png`);
-            const htmlPath = path.join(OUTPUT_DIR, 'pages', `day${day}.html`);
+    await fs.mkdir(path.join(OUTPUT_DIR, 'qr-codes'), { recursive: true });
     
-            // Generate QR code
-            await QRCode.toFile(qrCodePath, pageUrl);
-        }
+    for (let day = START_DAY; day <= END_DAY; day++) {
+        const pageUrl = `${BASE_URL}/advent-calendar/pages/december${day}.html`;
+        const qrCodePath = path.join(OUTPUT_DIR, 'qr-codes', `december${day}.png`);
+        await QRCode.toFile(qrCodePath, pageUrl);
+    }
+    
+    console.log('Generated QR codes successfully!');
 }
 
 generateQR().catch(console.error);
