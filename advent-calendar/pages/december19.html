@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -44,37 +43,67 @@
             padding: 0 1rem;
         }
 
-        .psalm-decoration {
-            color: #8b5e3c;
-            font-style: italic;
-            margin-top: 1.5rem;
-            font-size: 1.1rem;
-        }
-
-        .olive-branch {
-            width: 150px;
-            height: 150px;
-            margin: 2rem auto;
-        }
-
-        .day-image {
-            max-width: 100%;
-            height: auto;
+        #game-container {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            margin: 20px auto;
+            background: #f8f4e6;
             border-radius: 10px;
-            margin: 2rem 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            touch-action: none;
         }
 
-        @media (max-width: 600px) {
-            .container {
-                margin: 1rem;
-                padding: 1.5rem;
-            }
-            
-            .content {
-                font-size: 1.2rem;
-                padding: 0;
-            }
+        #tree {
+            width: 0;
+            height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-bottom: 200px solid #2d5a27;
+            position: absolute;
+            bottom: 100px;
+            left: 50px;
+        }
+
+        #trunk {
+            width: 40px;
+            height: 80px;
+            background: #5c3a21;
+            position: absolute;
+            bottom: 20px;
+            left: 130px;
+        }
+
+        .ornament {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+
+        #score {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #66392c;
+        }
+
+        #start-button {
+            background: #718e5c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        #message {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #66392c;
+            min-height: 1.5em;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -82,21 +111,79 @@
 <body>
     <div class="container">
         <h1>19 Dicembre</h1>
-        <svg class="olive-branch" viewBox="0 0 100 100">
-            <path d="M50,90 C30,60 70,60 50,30" fill="none" stroke="#4a6741" stroke-width="2"/>
-            <path d="M45,85 C35,65 65,65 45,35" fill="none" stroke="#4a6741" stroke-width="2"/>
-            <path d="M55,85 C35,65 75,65 55,35" fill="none" stroke="#4a6741" stroke-width="2"/>
-            <g fill="#718e5c">
-                <ellipse cx="50" cy="40" rx="4" ry="8" transform="rotate(-20)"/>
-                <ellipse cx="45" cy="50" rx="4" ry="8" transform="rotate(-10)"/>
-                <ellipse cx="55" cy="60" rx="4" ry="8" transform="rotate(10)"/>
-                <ellipse cx="48" cy="70" rx="4" ry="8" transform="rotate(-15)"/>
-                <ellipse cx="52" cy="80" rx="4" ry="8" transform="rotate(15)"/>
-            </g>
-        </svg>
         <div class="content">
-            Aggiungi messaggio per 24 Dicembre quì
+            <p>Decora l'albero di Natale! 🎄<br>Tocca l'albero per aggiungere le decorazioni.</p>
+            <button id="start-button">Nuova Partita</button>
+            <div id="score">Decorazioni: 0/10</div>
+            <div id="message"></div>
+            <div id="game-container">
+                <div id="trunk"></div>
+                <div id="tree"></div>
+            </div>
         </div>
     </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const tree = document.getElementById('tree');
+        const scoreDisplay = document.getElementById('score');
+        const messageDisplay = document.getElementById('message');
+        const startButton = document.getElementById('start-button');
+        
+        let ornaments = 0;
+        const maxOrnaments = 10;
+        const colors = ['#ff0000', '#ffd700', '#ff69b4', '#4169e1', '#9400d3', '#00ff00'];
+
+        function addOrnament(e) {
+            if (ornaments >= maxOrnaments) return;
+
+            const rect = gameContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check if click is within tree triangle
+            const treeLeft = 50;
+            const treeRight = 250;
+            const treeTop = 100;
+            const treeBottom = 300;
+            
+            if (y < treeTop || y > treeBottom || x < treeLeft || x > treeRight) {
+                return;
+            }
+
+            const ornament = document.createElement('div');
+            ornament.className = 'ornament';
+            ornament.style.left = x + 'px';
+            ornament.style.top = y + 'px';
+            ornament.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            gameContainer.appendChild(ornament);
+
+            ornaments++;
+            scoreDisplay.textContent = `Decorazioni: ${ornaments}/${maxOrnaments}`;
+
+            if (ornaments === maxOrnaments) {
+                messageDisplay.textContent = '🎉 Albero completato! Buon Natale! 🎄';
+            }
+        }
+
+        function startNewGame() {
+            // Clear existing ornaments
+            const existingOrnaments = document.querySelectorAll('.ornament');
+            existingOrnaments.forEach(ornament => ornament.remove());
+            
+            // Reset game state
+            ornaments = 0;
+            scoreDisplay.textContent = `Decorazioni: ${ornaments}/${maxOrnaments}`;
+            messageDisplay.textContent = '';
+        }
+
+        gameContainer.addEventListener('click', addOrnament);
+        gameContainer.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            addOrnament(touch);
+        });
+        startButton.addEventListener('click', startNewGame);
+    </script>
 </body>
 </html>
